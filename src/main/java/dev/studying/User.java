@@ -7,6 +7,8 @@ public class User {
     private final String username;
     private final String password;
     private final Set<User> followers = new HashSet<>();
+    private final Set<User> follows = new HashSet<>();
+    private Position lastSeenPosition = Position.INITIAL;
 
     public User(String username, String password) {
         this.username = username;
@@ -27,5 +29,26 @@ public class User {
 
     public Set<User> getFollowers(){
         return followers;
+    }
+
+    public Position getLastSeenPosition() {
+        return lastSeenPosition;
+    }
+
+    public void setLastSeenPosition(Position lastSeenPosition) {
+        this.lastSeenPosition = lastSeenPosition;
+    }
+
+    public void addFollow(User user){
+        follows.add(user);
+    }
+
+    public Set<User> getFollows() {
+        return follows;
+    }
+
+    @Override
+    public String toString() {
+        return "User(" + username + ")";
     }
 }

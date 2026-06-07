@@ -1,13 +1,17 @@
 package dev.studying;
 
 public class Twoot {
-    public final String id ;
-    public final String content;
+    private final String id ;
+    private final String content;
+    private final Position position;
+    private final User sender;
 
 
-    public Twoot(String id, String content) {
+    public Twoot(String id, String content, Position position, User sender) {
         this.id = id;
         this.content = content;
+        this.position = position;
+        this.sender = sender;
     }
 
     public String getId() {
@@ -16,5 +20,17 @@ public class Twoot {
 
     public String getContent() {
         return content;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public boolean isAfter(Position position){
+        return this.position.isAfter(position);
+    }
+
+    public User getSender() {
+        return sender;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +62,41 @@ public class TwootrTest {
 
         verify(otherReceiverEndPoint).onTwoot(any(Twoot.class));
 
+    }
+
+    @Test
+    public void shouldNotSendTwootsToNonFollowers(){
+        twootr.registerUser(USERNAME, PASSWORD);
+
+        Optional<SenderEndPoint> result = twootr.logon(USERNAME, PASSWORD,receiverEndPoint);
+
+        SenderEndPoint senderEndPoint = result.get();
+
+        senderEndPoint.onSendTwoot("1","Hello followers");
+
+        verify(otherReceiverEndPoint, never()).onTwoot(any(Twoot.class));
+    }
+
+    @Test
+    public void shouldReceiveReplayOfTwootsOnLogon(){
+        twootr.registerUser(USERNAME, PASSWORD);
+        twootr.registerUser(USERNAME_1, PASSWORD_1);
+
+        Optional<SenderEndPoint> result = twootr.logon(USERNAME, PASSWORD,receiverEndPoint);
+        Optional<SenderEndPoint> result_1 = twootr.logon(USERNAME_1, PASSWORD_1, otherReceiverEndPoint);
+
+        SenderEndPoint senderEndPoint = result.get();
+        SenderEndPoint otherSenderEndPoint = result_1.get();
+
+        otherSenderEndPoint.onFollow(senderEndPoint);
+
+        otherSenderEndPoint.logoff();
+
+        senderEndPoint.onSendTwoot("1", "Hello followers");
+
+        twootr.logon(USERNAME_1, PASSWORD_1, otherReceiverEndPoint);
+
+        verify(otherReceiverEndPoint).onTwoot(any(Twoot.class));
 
     }
 

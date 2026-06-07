@@ -10,12 +10,15 @@ public class SenderEndPoint {
     }
 
     public void onFollow(SenderEndPoint toFollow){
+        this.user.addFollow(toFollow.user);
         toFollow.user.addFollower(this.user);
-
     }
 
-    public void onSendTwoot(String id, String content){
-        Twoot twoot = new Twoot(id,content);
-        twootr.onSendTwoot(twoot, user);
+    public void onSendTwoot(String id, String content) {
+        twootr.onSendTwoot(id, content, user);
+    }
+
+    public void logoff(){
+        twootr.logoff(user);
     }
 }
