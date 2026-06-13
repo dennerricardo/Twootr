@@ -28,7 +28,7 @@ public class TwootrTest {
 
     @BeforeEach
     public void setUp(){
-        twootr = new Twootr();
+        twootr = new Twootr(new InMemoryUserRepository());
     }
 
     @Test
