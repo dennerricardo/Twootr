@@ -2,6 +2,7 @@ package dev.studying;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class User {
     private final String username;
@@ -9,6 +10,7 @@ public class User {
     private final Set<User> followers = new HashSet<>();
     private final Set<User> follows = new HashSet<>();
     private Position lastSeenPosition = Position.INITIAL;
+    private ReceiverEndPoint receiverEndPoint;
 
     public User(String username, String password) {
         this.username = username;
@@ -50,5 +52,21 @@ public class User {
     @Override
     public String toString() {
         return "User(" + username + ")";
+    }
+
+    public void onLogon(ReceiverEndPoint receiverEndPoint) {
+        this.receiverEndPoint = receiverEndPoint;
+    }
+
+    public Set<String> getFollowing() {
+        return follows.stream()
+                .map(User::getUsername)
+                .collect(Collectors.toSet());
+    }
+
+    public void receiveTwoot(Twoot twoot) {
+        receiverEndPoint.onTwoot(twoot);
+        setLastSeenPosition(twoot.getPosition());
+
     }
 }

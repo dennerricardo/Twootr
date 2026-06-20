@@ -8,9 +8,12 @@ public class Twootr {
     private int currentPosition = 0 ;
     private final List<Twoot> twoots = new ArrayList<>();
     private final UserRepository userRepository;
+    private final TwootRepository twootRepository;
 
-    public Twootr(UserRepository userRepository) {
+
+    public Twootr(UserRepository userRepository, TwootRepository twootRepository) {
         this.userRepository = userRepository;
+        this.twootRepository = twootRepository;
     }
 
     public void registerUser(String username, String password){
@@ -22,18 +25,25 @@ public class Twootr {
         User user = userRepository.lookup(username).orElse(null);
         if(user != null && password.equals(user.getPassword())){
             activeSessions.put(user, receiverEndPoint);
-            twoots.stream()
-                    .filter(twoot -> user.getFollows().contains(twoot.getSender()))
-                    .filter(twoot -> twoot.isAfter(user.getLastSeenPosition()))
-                    .forEach(twoot -> receiverEndPoint.onTwoot(twoot));
+            user.onLogon(receiverEndPoint);
+            twootRepository.query(
+                    new TwootQuery()
+                            .inUsers(user.getFollowing())
+                            .lastSeenPosition(user.getLastSeenPosition()),
+                    user::receiveTwoot
+            );
+//            twoots.stream()
+//                    .filter(twoot -> user.getFollows().contains(twoot.getSender()))
+//                    .filter(twoot -> twoot.isAfter(user.getLastSeenPosition()))
+//                    .forEach(twoot -> receiverEndPoint.onTwoot(twoot));
             return Optional.of(new SenderEndPoint(user,this));
         }
         return Optional.empty();
     }
 
     public void onSendTwoot(String id,String content, User sender){
-        Twoot twoot = new Twoot(id,content,new Position(currentPosition++), sender);
-        twoots.add(twoot);
+        Twoot twoot =  twootRepository.add(id,sender.getUsername(),content);
+//        twoots.add(twoot);
         sender.getFollowers()
                 .stream()
                 .filter(activeSessions::containsKey)
